@@ -1,0 +1,152 @@
+﻿<!doctype html>
+<link href="~/css/b2b.css" rel="stylesheet" />
+<script src="~/lib/jquery/dist/jquery.js"></script>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>B2B唯一码录入</title>
+</head>
+
+<body>
+    <div class="inputbox">
+        <div class="inputwrap">
+            <div class="input-cell">订单编号：</div>
+            <div class="input-cell pads">
+                <input class="text-i" name="input" id="orderId" type="text">
+            </div>
+            <div class="input-cell"><div class="submit-btn" onclick="NoDisable()">重置</div></div>
+        </div>
+        <div class="inputwrap" style="margin-top:30px;">
+            <div class="input-cell">唯一码扫描：</div>
+            <div class="input-cell" style="padding-right:40px;">
+                <input class="text-i" onfocus="disable()" id="unicode" name="input" type="text">
+            </div>
+            <div class="input-cell"><div class="submit-btn" onclick="checkBillNo()">确定</div></div>
+        </div>
+    </div>
+    <div class="listbox" style="width:1200px;">
+        <div class="list-t"><div class="tit">唯一码列表</div><div class="submit-btn2" onclick="submitUniCode()">上传唯一码</div></div>
+        <div class="list-zone">
+            <table class="tabs" width="100%" border="0" cellspacing="0" cellpadding="0" id="table">
+                <tr>
+                    <td width="5%" align="center" bgcolor="#eeeeee">NO.</td>
+                    <td width="15%" bgcolor="#eeeeee">订单编号</td>
+                    <td width="15%" bgcolor="#eeeeee">Sku</td>
+                    <td width="22%" bgcolor="#eeeeee">品名</td>
+                    <td width="25%" bgcolor="#eeeeee">唯一码</td>
+                    <td align="center" bgcolor="#eeeeee">操作</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</body>
+</html>
+<script type="text/javascript">
+    var url = "http://card.wine-world.com/";
+    var number = 1;
+    var partTInfArr = new Array();
+    function disable() {
+        if ($("#orderId").val() != "") {
+            $("#orderId").attr("disabled", true);
+        }
+    }
+    function NoDisable() {
+        $("#orderId").attr("disabled", false);
+    }
+    //检查订单
+    function checkBillNo() {
+        var billNo = $("#orderId").val()
+        var unicodeUrl = $("#unicode").val().trim();
+        if (billNo != "" && unicodeUrl != null) {
+            var nationSku = $("#unicode").val().substr(url.length, 41);
+            var unicode = $("#unicode").val().split("param=")[1];
+            if (unicode) {
+                $.ajax({
+                    url: "/iwms_aider/Home/CheckBillNo",
+                    data: { billNo: billNo, nationSku: nationSku },
+                    success: function (data) {
+                        if (data.result) {
+                            var html = "";
+                            var partTInfStr = {};
+                            partTInfStr.BillId = billNo;
+                            partTInfStr.UniCode = unicode;
+                            partTInfStr.Sku = data.data.sku;
+                            html += "<tr id='no_" + number + "'>" +
+                                "<td align='center'>" + number + "</td>" +
+                                "<td align= 'center'>" + billNo + "</td > " +
+                                "<td align= 'center'>" + data.data.sku + "</td > " +
+                                "<td align= 'center' >" + data.data.styleName + "</td > " +
+                                "<td >" + unicode + "</td > " +
+                                "<td align='center'> <span class='del-txt' onclick=\"d(" + number + ",'" + partTInfStr + "')\">删除</span></td > " +
+                                "</tr >";
+                            var isFirst = true;//不添加重复项
+                            for (var i = 0; i < partTInfArr.length; i++) {
+                                if (partTInfArr[i].BillId == partTInfStr.BillId
+                                    && partTInfArr[i].UniCode == partTInfStr.UniCode
+                                    && partTInfArr[i].Sku == partTInfStr.Sku) {
+                                    isFirst = false;
+                                    break;
+                                }
+                            }
+                            if (isFirst) {
+                                number++;
+                                $("#table").append(html);
+                                partTInfArr.push(partTInfStr);
+                            }
+                            else {
+                                alert("同一个订单，请勿添加相同唯一码")
+                            }
+                        }
+                        else {
+                            alert(data.message)
+                        }
+                        $("#unicode").val("");
+                    }
+                });
+            }
+            else {
+                alert("唯一码扫描出错，请核实")
+            }
+        } else { 
+
+            alert("请输入订单编号或者唯一码");
+        }
+
+    };
+    function d(num, partTInfStr){
+        $("#no_" + num).hide();
+        partTInfArr.pop(partTInfStr)
+    };
+
+    function submitUniCode() {
+        if (partTInfArr.length>0) {
+            $.ajax({
+                url: "/iwms_aider/Home/SubmitUniCode",
+                type: "post",
+                data: { param: JSON.stringify(partTInfArr) },
+                success: function (data) {
+                    if (data.result) {
+                        var html = "<tr><td width='5%' align='center' bgcolor='#eeeeee'>NO.</td>"+
+                           "<td width='15%' bgcolor='#eeeeee'>订单编号</td>"+
+                           "<td width='15%' bgcolor='#eeeeee'>Sku</td> "+
+                           "<td width='22%' bgcolor='#eeeeee'>品名</td> "+
+                           "<td width='25%' bgcolor='#eeeeee'>唯一码</td> "+
+                           "<td align='center' bgcolor='#eeeeee'>操作</td></tr>";
+                        $("#table").html(html);
+                        partTInfArr = [];
+                        number = 1;
+                        alert("录入成功");
+                    }
+                    else {
+                        alert(data.message);
+                    }
+
+                }
+            });
+        }
+        else {
+            alert("上传列表为空");
+        }
+
+    };
+</script>

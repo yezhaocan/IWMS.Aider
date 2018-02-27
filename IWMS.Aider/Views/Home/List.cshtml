@@ -1,0 +1,156 @@
+﻿
+<link href="~/css/b2blist.css" rel="stylesheet" />
+<script src="~/lib/jquery/dist/jquery.js"></script>
+<link href="~/lib/bootstrap/dist/css/bootstrap.css" rel="stylesheet" />
+<link href="~/lib/bootstrap/dist/css/bootstrap-datetimepicker.css" rel="stylesheet" />
+<script src="~/lib/bootstrap/dist/js/bootstrap.js"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap-datetimepicker.js"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap-paginator.min.js"></script>
+<script src="~/lib/bootstrap/dist/js/locales/bootstrap-datetimepicker.zh-CN.js"></script>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>B2B唯一码查询</title>
+</head>
+
+<body>
+    <form action="/iwms_aider/home/ExportList" method="post" enctype="application/x-www-form-urlencoded">
+        <div class="inputbox" style="border-bottom:0px; padding-bottom:0;">
+            <div class="inputwrap">
+                <div class="input-cell">开始时间：</div>
+                <div class="input-cell pads">
+                    <input id="startTime"  size="16" class="text-i form_datetime" name="startTime" type="text">
+                </div>
+                <div class="input-cell">截止时间：</div>
+                <div class="input-cell" style="padding-right:15px;">
+                    <input id="endTime" size="16" class="text-i form_datetime" name="endTime" type="text">
+                </div>
+            </div>
+            <div class="inputwrap">
+                <div class="input-cell">SKU/款号：</div>
+                <div class="input-cell pads">
+                    <input id="sku" class="text-i" name="sku" type="text">
+                </div>
+                <div class="input-cell">唯一码：</div>
+                <div class="input-cell" style="padding-right:15px;">
+                    <input id="uniCode" class="text-i" name="uniCode" type="text" style="width:300px;">
+                </div>
+                <div class="input-cell pads2">
+                    <div class="submit-btn" onclick="searchList()">查询</div>
+                </div>
+                <div class="input-cell pads2">
+                    <input class="submit-btn"  type="submit" value="导出"/>
+                </div>
+            </div>
+        </div>
+    </form>
+    <div class="listbox">
+        <div class="list-zone">
+            <table class="tabs" width="100%" border="0" cellspacing="0" cellpadding="0" id="table">
+                <tr id='table_tr'><td width='4%' align='center'><span class='tab-nr'>序号</span></td><td width='12%'>单据编号</td><td width='30%'>唯一码</td><td width='6%'>发货仓</td><td width='12%'>SKU</td><td width='18%'>品名</td><td>款号</td><td width='9%'>唯一码录入时间</td></tr> 
+            </table>
+        </div>
+    </div>
+    <div id="example" style="text-align: center"> <ul id="pageLimit"></ul> </div>
+</body>
+</html>
+<script type="text/javascript">
+    $(".form_datetime").datetimepicker({
+        language: 'zh-CN',
+        format: "yyyy-mm-dd",
+        autoclose: true,
+        todayBtn: true,
+        initialDate: new Date(),
+        minView: "month"
+    });
+    function searchList() {
+        var startTime = $("#startTime").val();
+        var endTime = $("#endTime").val();
+        var sku = $("#sku").val().trim();
+        var uniCode = $("#uniCode").val().trim();
+        $.ajax({
+            url: "/iwms_aider/Home/searchList",
+            type: "post",
+            data: { startTime: startTime, endTime: endTime, sku: sku, uniCode: uniCode,pageIndex:1},
+            success: function (data) { 
+                if (data.result) {
+                        var number = 1;
+                        var html = "<tr id='table_tr'><td width= '4%' align= 'center' ><span class='tab-nr'>序号</span></td><td width='12%'>单据编号</td><td width='30%'>唯一码</td><td width='6%'>发货仓</td><td width='12%'>SKU</td><td width='18%'>品名</td><td>款号</td><td width='9%'>唯一码录入时间</td></tr >";
+
+                        if (data.data.length > 0) {
+                        for (var i = 0; i < data.data.length; i++) {
+                            html +=
+                                "<tr>" +
+                                "<td align='center'>" + number + "</td>" +
+                                "<td><span class='tab-nr'>" + data.data[i].billId + "</span></td > " +
+                                "<td><span class='tab-nr'>" + data.data[i].uniCode + "</span></td > " +
+                                "<td><span class='tab-nr'>" + data.data[i].ckName + "</span></td > " +
+                                "<td><span class='tab-nr'>" + data.data[i].sku + "</span></td > " +
+                                "<td><span class='tab-nr'>" + data.data[i].styleName + "</span></td > " +
+                                "<td><span class='tab-nr'>" + data.data[i].style + "</span></td > " +
+                                "<td><span class='tab-nr'>" + data.data[i].operDate + "</span></td > " +
+                                "</tr > ";
+                            number++;
+                            }
+                        }
+                        $("#table").html(html);
+                        $('#pageLimit').bootstrapPaginator({
+                            currentPage: 1,
+                            totalPages: data.pageCount,
+                            size: "normal",
+                            bootstrapMajorVersion: 3,
+                            alignment: "right",
+                            numberOfPages: 8,
+                            itemTexts: function (type, page, current) {
+                                switch (type) {
+                                    case "first": return "首页";
+                                    case "prev": return "上一页";
+                                    case "next": return "下一页";
+                                    case "last": return "末页";
+                                    case "page": return page;
+                                }//默认显示的是第一页。
+                            },
+                            onPageClicked: function (event, originalEvent, type, page) {//给每个页眉绑定一个事件，其实就是ajax请求，其中page变量为当前点击的页上的数字。
+                                $.ajax({
+                                    url: '/iwms_aider/Home/searchList',
+                                    type: 'POST',
+                                    data: { pageIndex: page, startTime: startTime, endTime: endTime, sku: sku, uniCode: uniCode },
+                                    dataType: 'JSON',
+                                    success: function (data) {
+                                        if (data.result) {
+                                            var number = 1;
+                                            var html = "<tr id='table_tr'><td width= '4%' align= 'center' ><span class='tab-nr'>序号</span></td><td width='12%'>单据编号</td><td width='30%'>唯一码</td><td width='6%'>发货仓</td><td width='12%'>SKU</td><td width='18%'>品名</td><td>款号</td><td width='9%'>唯一码录入时间</td></tr >";
+
+                                            if (data.data.length > 0) {
+                                                for (var i = 0; i < data.data.length; i++) {
+                                                    html +=
+                                                        "<tr>" +
+                                                        "<td align='center'>" + number + "</td>" +
+                                                        "<td><span class='tab-nr'>" + data.data[i].billId + "</span></td > " +
+                                                        "<td><span class='tab-nr'>" + data.data[i].uniCode + "</span></td > " +
+                                                        "<td><span class='tab-nr'>" + data.data[i].ckName + "</span></td > " +
+                                                        "<td><span class='tab-nr'>" + data.data[i].sku + "</span></td > " +
+                                                        "<td><span class='tab-nr'>" + data.data[i].styleName + "</span></td > " +
+                                                        "<td><span class='tab-nr'>" + data.data[i].style + "</span></td > " +
+                                                        "<td><span class='tab-nr'>" + data.data[i].operDate + "</span></td > " +
+                                                        "</tr > ";
+                                                    number++;
+                                                }
+                                            }
+                                            $("#table").html(html);
+                                        }
+                                        else {
+                                            alert(data.message);
+                                        }
+                                    }
+                                });
+                            }
+                        });
+                }
+                else {
+                    alert(data.message);
+                }
+            }
+        })
+    }
+</script>

@@ -1,0 +1,127 @@
+﻿body {
+    padding: 0;
+    margin: 0;
+    font-size: 12px;
+    font-family: Arial,Helvetica,"宋体"
+}
+
+dd, dl, dt, form, h1, h2, h3, h4, h5, input, li, ol, p, ul {
+    margin: 0;
+    padding: 0;
+    list-style: none
+}
+
+img {
+    border: 0;
+    vertical-align: middle;
+}
+
+a:link {
+    color: #333;
+    text-decoration: none
+}
+
+a:visited {
+    color: #333;
+    text-decoration: none
+}
+
+a:hover {
+    color: #ac1630;
+    text-decoration: underline
+}
+
+a:active {
+    color: #333;
+    text-decoration: none
+}
+
+.inputbox {
+    padding: 20px;
+    border-bottom: 1px solid #e6e6e6;
+}
+
+.inputwrap {
+    width: 100%;
+    overflow: hidden;
+}
+
+.input-cell {
+    float: left;
+    height: 30px;
+    line-height: 30px;
+}
+
+.text-i {
+    width: 200px;
+    height: 28px;
+    line-height: 28px\9;
+    padding: 0px 8px;
+    border: 1px solid #ddd;
+    box-shadow: inset 0px 1px 3px #eee;
+    -moz-box-shadow: inset 0px 1px 3px #eee;
+    outline: none;
+}
+
+.pads {
+    padding-right: 30px;
+}
+
+.submit-btn {
+    height: 30px;
+    width: 60px;
+    text-align: center;
+    background-color: #2a74e4;
+    color: #fff;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.listbox {
+    padding: 15px 20px;
+}
+
+.list-t {
+    width: 100%;
+    overflow: hidden;
+    padding-bottom: 15px;
+}
+
+.tit {
+    float: left;
+    padding-top: 10px;
+    line-height: 20px;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.submit-btn2 {
+    float: right;
+    padding: 0 30px;
+    height: 30px;
+    line-height: 30px;
+    font-size: 14px;
+    background-color: #2a74e4;
+    border-radius: 3px;
+    cursor: pointer;
+    color: #fff;
+}
+
+.tabs, .tabs td {
+    border-collapse: collapse;
+    border: 1px solid #e6e6e6;
+}
+
+    .tabs td {
+        padding: 0 12px;
+        line-height: 30px;
+    }
+
+.lbg {
+    background-color: #f9f9f9;
+}
+
+.del-txt {
+    color: #2057b3;
+    cursor: pointer;
+}
